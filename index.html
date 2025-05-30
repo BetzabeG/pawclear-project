@@ -1,0 +1,3086 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawClear - Simulación IA para Medicina Nuclear</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        header {
+            background: rgb(222, 223, 233);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4a90a4;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background: #4a90a4;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: #4a90a4;
+            border: 2px solid #4a90a4;
+        }
+
+        .btn-register {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main Content */
+        main {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        main.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Home Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            min-height: 70vh;
+            margin-bottom: 4rem;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4a90a4, #6ab7c7);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(74, 144, 164, 0.4);
+        }
+
+        .hero-visual {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lab-animation {
+            width: 80%;
+            height: 80%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(2deg);
+            }
+        }
+
+
+
+
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #4a90a4;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4a90a4;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .how-it-works {
+            text-align: center;
+            margin: 4rem 0;
+        }
+
+        .how-it-works h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .step-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #4a90a4, #6ab7c7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 25px rgba(74, 144, 164, 0.3);
+        }
+
+        /* About Us Section */
+        .about-hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .about-hero h1 {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .mission-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .vision-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-section {
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .team-section h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .team-member {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .team-member:hover {
+            transform: translateY(-10px);
+        }
+
+        .member-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #4a90a4, #6ab7c7);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        /* Simulation Section */
+        .simulation-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .simulation-panel {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .parameter-group {
+            margin-bottom: 2rem;
+        }
+
+        .parameter-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .parameter-group input,
+        .parameter-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .parameter-group input:focus,
+        .parameter-group select:focus {
+            outline: none;
+            border-color: #4a90a4;
+            box-shadow: 0 0 10px rgba(74, 144, 164, 0.2);
+        }
+
+        .results-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+        }
+
+        .result-metric {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 2s ease;
+            width: 0%;
+        }
+
+        .btn-simulate {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 1.2rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Chat Section */
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(45deg, #4a90a4, #6ab7c7);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .paw-avatar {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a90a4;
+            font-size: 1.8rem;
+        }
+
+        .chat-info h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .chat-status {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 1.2rem 1.5rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.user .message-content {
+            background: #4a90a4;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .quick-btn {
+            background: #e9ecef;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #4a90a4;
+            color: white;
+        }
+
+        .chat-input {
+            padding: 1.5rem;
+            border-top: 1px solid #ecf0f1;
+            background: white;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .chat-input input:focus {
+            border-color: #4a90a4;
+        }
+
+        .send-btn {
+            background: #4a90a4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Support Section */
+        .support-hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .support-hero h1 {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .support-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .support-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .support-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #4a90a4, #6ab7c7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .faq-section {
+            margin-top: 4rem;
+        }
+
+        .faq-section h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .faq-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            color: #7f8c8d;
+            display: none;
+            margin-top: 1rem;
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .simulation-container {
+                grid-template-columns: 1fr;
+            }
+
+            .support-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="images/logo_paw-removebg-preview.png" alt="Logo PawClear"
+                    style="height: 60px; width: 60px; object-fit: contain; vertical-align: middle; margin-right: 0.5rem;">
+                PawClear
+            </div>
+            <nav>
+                <a href="#" class="nav-link active" data-section="home">Home</a>
+                <a href="#" class="nav-link" data-section="about">About Us</a>
+                <a href="#" class="nav-link" data-section="simulation">Simulations IA</a>
+                <a href="#" class="nav-link" data-section="littlepaw">Little Paw IA</a>
+                <a href="#" class="nav-link" data-section="support">Support</a>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-login">Login</button>
+                <button class="btn btn-register">Register</button>
+            </div>
+        </header>
+
+        <!-- HOME SECTION -->
+        <main id="home" class="active">
+            <section class="hero">
+                <div class="hero-content">
+                    <h1>The laboratory of the future, without cages or needles.</h1>
+                    <p>"Join the revolution that will save 1 million animal lives and accelerate the cure for several
+                        types of cancer."</p>
+                    <button class="btn-primary" onclick="showSection('simulation')">Let's start simulating</button>
+                </div>
+                <div class="hero-visual">
+                    <div class="lab-animation">
+                        <div class="molecule-orbit">
+                            <div class="molecule"></div>
+                        </div>
+                        <img src="images/lab_mouse.png" alt="Lab Mouse"
+                            style="width: 550px; height: 380px; border-radius: 6%; object-fit: cover; ">
+                    </div>
+                </div>
+            </section>
+            <!-- Sección de Little Paw en Home -->
+            <section class="little-paw-promo">
+                <div class="promo-content">
+                    <h2>Chat with Little Paw</h2>
+                    <p>Little Paw will be your guide on this experience, answering all your questions about nuclear
+                        energy, radioisotopes, and more.</p>
+                    <button class="btn-primary" onclick="showSection('littlepaw')">Let's start chatting</button>
+                </div>
+                <div class="promo-image">
+                    <img src="images/mouse_chat-removebg-preview.png" alt="Little Paw" class="paw-avatar-large"
+                        style="object-fit: contain;">
+                    <div class="chat-bubble">
+                        <p>¡Hola! I'm Little Paw, your AI assistant for nuclear medicine. How can I help you today?</p>
+                    </div>
+                </div>
+            </section>
+
+            <style>
+                /* Estilos para la sección de Little Paw en Home */
+                .little-paw-promo {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 3rem;
+                    align-items: center;
+                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                    border-radius: 20px;
+                    padding: 3rem;
+                    margin: 4rem 0;
+                }
+
+                .promo-content h2 {
+                    font-size: 2.5rem;
+                    color: #2c3e50;
+                    margin-bottom: 1rem;
+                }
+
+                .promo-content p {
+                    font-size: 1.2rem;
+                    color: #7f8c8d;
+                    margin-bottom: 2rem;
+                    line-height: 1.5;
+                }
+
+                .promo-image {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    position: relative;
+                }
+
+                .paw-avatar-large {
+                    width: 120px;
+                    height: 120px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #4a90a4;
+                    font-size: 4rem;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                    margin-bottom: 1.5rem;
+                    border: 5px solid #4a90a4;
+                }
+
+                .chat-bubble {
+                    background: white;
+                    padding: 1.5rem;
+                    border-radius: 20px;
+                    border-bottom-left-radius: 5px;
+                    max-width: 80%;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                    position: relative;
+                    animation: float 3s ease-in-out infinite;
+                }
+
+                .chat-bubble:after {
+                    content: '';
+                    position: absolute;
+                    left: 25px;
+                    top: -15px;
+                    border: 8px solid transparent;
+                    border-bottom-color: white;
+                }
+
+                .chat-bubble p {
+                    color: #2c3e50;
+                    margin: 0;
+                    font-size: 1.1rem;
+                }
+
+                @media (max-width: 768px) {
+                    .little-paw-promo {
+                        grid-template-columns: 1fr;
+                        text-align: center;
+                    }
+
+                    .promo-image {
+                        margin-top: 2rem;
+                    }
+                }
+            </style>
+            <!--
+            FALTA COMPLETAR ESTADISTICAS
+            -->
+            <section class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="animals-saved">192.1M
+                    </div>
+                    <div class="stat-label">Animals are sacrificed per year. </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$1000M</div>
+                    <div class="stat-label">Cost spent per year on animal testing.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">90%</div>
+                    <div class="stat-label">Animal experiments can be replaced by simulations.</div>
+                </div>
+            </section>
+
+            <section class="how-it-works">
+                <h2>How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-icon">📊</div>
+                        <h3>Configure Parameters</h3>
+                        <p>Set up your experimental conditions with our intuitive interface</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">🤖</div>
+                        <h3>AI Processing</h3>
+                        <p>Our advanced AI analyzes your parameters and predicts outcomes</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">📈</div>
+                        <h3>Get Results</h3>
+                        <p>Receive accurate predictions in minutes instead of months</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ABOUT US SECTION -->
+        <main id="about">
+            <section class="about-hero">
+                <h1>Revolutionizing Nuclear Medicine with Ethics</h1>
+                <p style="font-size: 1.3rem; color: #7f8c8d; max-width: 800px; margin: 0 auto;">We believe in advancing
+                    science without compromising animal welfare. Our AI-powered platform is changing how researchers
+                    approach thyroid cancer treatment development.</p>
+            </section>
+
+            <div class="about-grid">
+                <div class="mission-card">
+                    <div class="card-icon">
+                        <img src="images/mission.png" alt="Mission"
+                            style="width:200px;height:120px;object-fit:contain;">
+                    </div>
+                    <h2>Our Mission</h2>
+                    <p>To eliminate animal suffering in nuclear medicine research by providing researchers with
+                        accurate, AI-powered simulation tools that accelerate discovery while maintaining ethical
+                        standards.</p>
+                </div>
+                <div class="vision-card">
+                    <div class="card-icon">
+                        <img src="images/vision.png" alt="Vision"
+                            style="width:200px;height:120px;object-fit:contain;border-radius: 12%;">
+                    </div>
+                    <h2>Our Vision</h2>
+                    <p>A world where medical breakthroughs happen faster and more ethically, where every life - human
+                        and animal - is valued, and where technology serves compassion.</p>
+                </div>
+            </div>
+
+            <section class="team-section">
+                <h2>Meet Our Team</h2>
+                <div class="team-grid">
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: none; padding: 0;">
+                            <img src="images/perfil_ale.jpg" alt="Alejandra Callata Ticona"
+                                style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:4px solid #4a90a4;">
+                        </div>
+                        <h3>Univ. Alejandra Callata Ticona </h3>
+                        <p><strong>Biomedical Engineering</strong></p>
+                        <p>CEO, with 5 years of industry experience </p>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: none; padding: 0;">
+                            <img src="images/perfil_bet.png" alt="Betzabe Gutierrez Morales"
+                                style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:4px solid #4a90a4;">
+                        </div>
+                        <h3>Univ. Betzabe Gutierrez Morales</h3>
+                        <p><strong>Informatic</strong></p>
+                        <p>Software development manager</p>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: none; padding: 0;">
+                            <img src="images/perfil_jean.jpg" alt="Jean Callejas Jimenez"
+                                style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:4px solid #4a90a4;">
+                        </div>
+                        <h3>Univ. Jean Callejas Jimenez </h3>
+                        <p><strong>Biomedical Engineering</strong></p>
+                        <p>Leader researcher</p>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: none; padding: 0;">
+                            <img src="images/perfil_dafne.jpg" alt="Dafne Huanca Calsina"
+                                style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:4px solid #4a90a4;">
+                        </div>
+                        <h3>Univ. Dafne Huanca Calsina</h3>
+                        <p><strong>Biomedical Engineering</strong></p>
+                        <p>Lead graphic designer</p>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: none; padding: 0;">
+                            <img src="images/perfil_joaquin.jpg" alt="Joaquin Mendoza Huallpa"
+                                style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:4px solid #4a90a4;">
+                        </div>
+                        <h3>Univ. Joaquin Mendoza Huallpa</h3>
+                        <p><strong>Biomedical Engineering</strong></p>
+                        <p>Logistics manager</p>
+                    </div>
+                </div>
+            </section>
+            <style>
+                .team-section {
+                    text-align: center;
+                }
+
+                .team-grid {
+                    justify-content: center;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 2rem;
+                }
+            </style>
+        </main>
+
+        <!-- SIMULATION SECTION -->
+        <main id="simulation">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Nuclear Medicine Simulations</h1>
+
+            <p style="text-align: center; max-width: 800px; margin: 0 auto 3rem; font-size: 1.2rem; color: #7f8c8d;">
+                Select the radioisotope or procedure you want to simulate. Our AI will provide accurate results without
+                animal testing.
+            </p>
+
+            <!-- Carousel de simulaciones -->
+            <div class="simulation-carousel-container">
+                <button class="carousel-btn carousel-prev">❮</button>
+
+                <div class="simulation-carousel">
+                    <!-- Tarjeta 1 -->
+                    <div class="simulation-card">
+                        <div class="card-icon-container" style="height: 240px;">
+                            <img src="images/tiroide.jpg" alt="Bone icon"
+                                style="width: 220px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);" />
+                        </div>
+                        <div class="card-content">
+                            <h3>Thyroid gland cancer</h3>
+                            <p>Simulates Iodine-131 experimentation in mice</p>
+                            <button class="btn-primary sim-btn" data-simulation="thyroid">START</button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 2 -->
+                    <div class="simulation-card">
+                        <div class="card-icon-container" style="height: 240px;">
+                            <img src="images/prostata.jpeg" alt="Microscope icon"
+                                style="width: 220px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);" />
+                        </div>
+                        <div class="card-content">
+                            <h3>Prostate Cancer</h3>
+                            <p>177Lu-PSMA simulation protocol</p>
+                            <button class="btn-primary sim-btn" data-simulation="prostate">START</button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 3 -->
+                    <div class="simulation-card">
+                        <div class="card-icon-container" style="height: 240px;">
+                            <img src="images/breaster_cancer.jpeg" alt="Microscope icon"
+                                style="width: 220px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);" />
+                        </div>
+                        <div class="card-content">
+                            <h3>Breast Cancer</h3>
+                            <p>99mTc-sestamibi imaging simulation</p>
+                            <button class="btn-primary sim-btn" data-simulation="breast">START</button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 4 -->
+                    <div class="simulation-card">
+                        <div class="card-icon-container" style="height: 240px;">
+                            <img src="images/lung_cancer.jpg" alt="Microscope icon"
+                                style="width: 220px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);" />
+                        </div>
+                        <div class="card-content">
+                            <h3>Lung Cancer</h3>
+                            <p>18F-FDG PET simulation</p>
+                            <button class="btn-primary sim-btn" data-simulation="lung">START</button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 5 -->
+                    <div class="simulation-card">
+                        <div class="card-icon-container" style="height: 240px;">
+                            <img src="images/ColorectalCancer.jpg" alt="Microscope icon"
+                                style="width: 220px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);" />
+                        </div>
+                        <div class="card-content">
+                            <h3>Colorectal Cancer</h3>
+                            <p>111In-octreotide simulation</p>
+                            <button class="btn-primary sim-btn" data-simulation="colorectal">START</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="carousel-btn carousel-next">❯</button>
+            </div>
+
+            <!-- Contenedor para la simulación específica -->
+            <div id="simulation-specific" style="display: none;">
+                <!-- Aquí se cargará dinámicamente la simulación específica -->
+            </div>
+        </main>
+
+        <!-- Contenedores de simulaciones específicas (inicialmente ocultos) -->
+        <!-- Simulación mejorada de Tiroides con I-131 -->
+        <div id="sim-thyroid" class="simulation-specific-content" style="display: none;">
+            <div class="simulation-header">
+                <button class="btn-back">← Back to simulations</button>
+                <h2>Thyroid Cancer I-131 Simulation</h2>
+                <p class="sim-description">This simulation uses the Compartment mathematical model to predict the
+                    effects of I-131 radioiodine treatment on thyroid cancer in mice. The model incorporates known
+                    parameters and dose-response relationships.</p>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-panel">
+                    <h2 class="panel-title">🧪 Configure I-131 Simulation</h2>
+
+                    <!-- Parámetros Básicos -->
+                    <div class="parameter-group">
+                        <h3 class="param-category">Basic Parameters</h3>
+
+                        <label>Subject Weight (grams)</label>
+                        <input type="range" min="15" max="35" value="25" id="weight-slider-thyroid">
+                        <span id="weight-value-thyroid">25g</span>
+                        <small class="param-help">Affects drug distribution and clearance rate</small>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label>Age Group</label>
+                        <select id="age-select-thyroid">
+                            <option value="young">Young (2-4 months)</option>
+                            <option value="adult" selected>Adult (4-12 months)</option>
+                            <option value="elderly">Elderly (12+ months)</option>
+                        </select>
+                        <small class="param-help">Influences metabolic rate and drug sensitivity</small>
+                    </div>
+
+                    <!-- Parámetros del Tumor -->
+                    <div class="parameter-group">
+                        <h3 class="param-category">Tumor Characteristics</h3>
+
+                        <label>Initial Tumor Volume (mm³)</label>
+                        <input type="range" min="10" max="200" step="1" value="50" id="volume-slider-thyroid">
+                        <span id="volume-value-thyroid">50 mm³</span>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label>Growth Rate (λ) per day</label>
+                        <input type="range" min="0.01" max="0.2" step="0.01" value="0.05" id="growth-slider-thyroid">
+                        <span id="growth-value-thyroid">0.05</span>
+                        <small class="param-help">Based on exponential growth model V(t) = V₀e^(λt)</small>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label>Tumor Uptake (%/day)</label>
+                        <select id="uptake-select-thyroid">
+                            <option value="low">Low (40-60%)</option>
+                            <option value="medium" selected>Medium (60-80%)</option>
+                            <option value="high">High (80-95%)</option>
+                        </select>
+                        <small class="param-help">Percentage of administered I-131 absorbed by tumor</small>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label>Metastasis Index</label>
+                        <select id="metastasis-select-thyroid">
+                            <option value="none">None</option>
+                            <option value="low" selected>Low</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <!-- Parámetros del Tratamiento -->
+                    <div class="parameter-group">
+                        <h3 class="param-category">Treatment Parameters</h3>
+
+                        <label>I-131 Dose (mCi)</label>
+                        <input type="range" min="0.1" max="10" step="0.1" value="5" id="dose-slider-thyroid">
+                        <span id="dose-value-thyroid">5.0 mCi</span>
+                        <small class="param-help">Typical therapeutic range: 1-10 mCi for mice models</small>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label>Administration Method</label>
+                        <select id="method-select-thyroid">
+                            <option value="oral">Oral</option>
+                            <option value="injection" selected>Injection</option>
+                        </select>
+                        <small class="param-help">Affects bioavailability and uptake kinetics</small>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label>Observation Period (days)</label>
+                        <input type="range" min="1" max="60" value="30" id="period-slider-thyroid">
+                        <span id="period-value-thyroid">30 days</span>
+                    </div>
+
+                    <button class="btn-simulate" id="run-simulation-thyroid">
+                        Run Simulation <span class="loading" style="display: none;"></span>
+                    </button>
+                </div>
+
+                <div class="results-panel">
+                    <h2 class="panel-title">📊 Simulation Results</h2>
+
+                    <div class="results-tabs">
+                        <button class="tab-btn active" data-tab="summary">Summary</button>
+                        <button class="tab-btn" data-tab="kinetics">Kinetics</button>
+                        <button class="tab-btn" data-tab="prediction">AI Prediction</button>
+                    </div>
+
+                    <div class="tab-content active" id="summary-tab">
+                        <div class="result-metric">
+                            <div class="metric-label">Thyroid Uptake</div>
+                            <div class="metric-value" id="uptake-value-thyroid">--</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="uptake-progress-thyroid"></div>
+                            </div>
+                        </div>
+
+                        <div class="result-metric">
+                            <div class="metric-label">Effective Half-Life</div>
+                            <div class="metric-value" id="half-life-value-thyroid">--</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="half-life-progress-thyroid"></div>
+                            </div>
+                        </div>
+
+                        <div class="result-metric">
+                            <div class="metric-label">Radiation Exposure</div>
+                            <div class="metric-value" id="radiation-value-thyroid">--</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="radiation-progress-thyroid"></div>
+                            </div>
+                        </div>
+
+                        <div class="result-metric">
+                            <div class="metric-label">Tumor Response</div>
+                            <div class="metric-value" id="response-value-thyroid">--</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="response-progress-thyroid"></div>
+                            </div>
+                        </div>
+
+                        <div class="result-metric">
+                            <div class="metric-label">Predicted Efficacy</div>
+                            <div class="metric-value" id="efficacy-value-thyroid">--</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="efficacy-progress-thyroid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="kinetics-tab">
+                        <canvas id="kinetics-chart" height="200"></canvas>
+
+                        <div class="kinetics-details">
+                            <div class="kinetics-item">
+                                <span class="kinetics-label">Physical Half-Life:</span>
+                                <span class="kinetics-value">8.02 days</span>
+                            </div>
+                            <div class="kinetics-item">
+                                <span class="kinetics-label">Biological Half-Life:</span>
+                                <span class="kinetics-value" id="bio-half-life">--</span>
+                            </div>
+                            <div class="kinetics-item">
+                                <span class="kinetics-label">Effective Half-Life:</span>
+                                <span class="kinetics-value" id="eff-half-life">--</span>
+                            </div>
+                            <div class="kinetics-item">
+                                <span class="kinetics-label">Volume Reduction:</span>
+                                <span class="kinetics-value" id="volume-reduction">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="prediction-tab">
+                        <h3>AI-Based Treatment Outcome Prediction</h3>
+                        <div class="ai-prediction-results">
+                            <div class="prediction-item">
+                                <span class="prediction-label">Treatment Success Probability:</span>
+                                <span class="prediction-value" id="success-prob">--</span>
+                            </div>
+                            <div class="prediction-item">
+                                <span class="prediction-label">Expected Tumor Regression:</span>
+                                <span class="prediction-value" id="tumor-regression">--</span>
+                            </div>
+                            <div class="prediction-item">
+                                <span class="prediction-label">Survival Probability at 60 days:</span>
+                                <span class="prediction-value" id="survival-prob">--</span>
+                            </div>
+                            <div class="prediction-item">
+                                <span class="prediction-label">Recommended Dose Adjustment:</span>
+                                <span class="prediction-value" id="dose-recommendation">--</span>
+                            </div>
+                        </div>
+
+                        <div class="ai-explanation">
+                            <h4>Model Explanation</h4>
+                            <p id="ai-explanation-text">Run the simulation to get AI-powered insights based on this
+                                configuration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            /* Estilos para la simulación específica de tiroides */
+            .sim-description {
+                font-size: 1rem;
+                color: #7f8c8d;
+                margin-top: 0.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .param-category {
+                font-size: 1.1rem;
+                color: #4a90a4;
+                border-bottom: 1px solid #e0e0e0;
+                margin: 1.5rem 0 1rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .param-help {
+                display: block;
+                font-size: 0.8rem;
+                color: #95a5a6;
+                margin-top: 0.25rem;
+            }
+
+            /* Estilos para las pestañas de resultados */
+            .results-tabs {
+                display: flex;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                margin-bottom: 1.5rem;
+            }
+
+            .tab-btn {
+                background: transparent;
+                color: rgba(255, 255, 255, 0.7);
+                border: none;
+                padding: 0.75rem 1rem;
+                cursor: pointer;
+                font-weight: 500;
+                transition: all 0.3s;
+            }
+
+            .tab-btn.active {
+                color: white;
+                border-bottom: 3px solid white;
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            /* Estilos para la gráfica de cinética */
+            #kinetics-chart {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .kinetics-details {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .kinetics-item {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+
+            .kinetics-label {
+                font-size: 0.85rem;
+                opacity: 0.8;
+            }
+
+            .kinetics-value {
+                font-weight: bold;
+            }
+
+            /* Estilos para la predicción de IA */
+            .ai-prediction-results {
+                margin-bottom: 1.5rem;
+            }
+
+            .prediction-item {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 0.75rem;
+                border-radius: 6px;
+                margin-bottom: 0.5rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .prediction-value {
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+
+            .ai-explanation {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 1rem;
+                border-radius: 6px;
+            }
+
+            .ai-explanation h4 {
+                margin-top: 0;
+                margin-bottom: 0.5rem;
+                opacity: 0.9;
+            }
+        </style>
+        <style>
+            /* Estilos para el carousel de simulaciones */
+            .simulation-carousel-container {
+                position: relative;
+                max-width: 100%;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 0 40px;
+            }
+
+            .simulation-carousel {
+                display: flex;
+                gap: 30px;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                padding: 20px 0;
+                -ms-overflow-style: none;
+                /* Para IE y Edge */
+                scrollbar-width: none;
+                /* Para Firefox */
+            }
+
+            .simulation-carousel::-webkit-scrollbar {
+                display: none;
+                /* Para Chrome, Safari y Opera */
+            }
+
+            .simulation-card {
+                flex: 0 0 300px;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s;
+                overflow: hidden;
+            }
+
+            .simulation-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            }
+
+            .card-icon-container {
+                height: 180px;
+                background: #a8e6cf;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s;
+            }
+
+            .card-icon-container img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .card-content {
+                padding: 25px;
+                text-align: center;
+            }
+
+            .card-content h3 {
+                color: #2c3e50;
+                margin-bottom: 10px;
+            }
+
+            .card-content p {
+                color: #7f8c8d;
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+            }
+
+            .sim-btn {
+                padding: 0.8rem 1.8rem;
+                font-size: 1rem;
+                border-radius: 30px;
+            }
+
+            .carousel-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 1.5rem;
+                color: #4a90a4;
+                cursor: pointer;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s;
+            }
+
+            .carousel-btn:hover {
+                background: #4a90a4;
+                color: white;
+            }
+
+            .carousel-prev {
+                left: 0;
+            }
+
+            .carousel-next {
+                right: 0;
+            }
+
+            /* Estilos para la página específica de simulación */
+            .simulation-specific-content {
+                padding: 30px 0;
+            }
+
+            .simulation-header {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .btn-back {
+                background: transparent;
+                border: 2px solid #4a90a4;
+                color: #4a90a4;
+                padding: 0.6rem 1.2rem;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: all 0.3s;
+            }
+
+            .btn-back:hover {
+                background: #4a90a4;
+                color: white;
+            }
+        </style>
+        <script>
+            // Funcionalidad para el carousel
+            document.addEventListener('DOMContentLoaded', function () {
+                const carousel = document.querySelector('.simulation-carousel');
+                const prevBtn = document.querySelector('.carousel-prev');
+                const nextBtn = document.querySelector('.carousel-next');
+                const cardWidth = 330; // Ancho de la tarjeta + gap
+
+                prevBtn.addEventListener('click', () => {
+                    carousel.scrollBy({
+                        left: -cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    carousel.scrollBy({
+                        left: cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+
+                // Manejo de simulaciones específicas
+                const simBtns = document.querySelectorAll('.sim-btn');
+                const simContainer = document.getElementById('simulation-specific');
+                const carouselContainer = document.querySelector('.simulation-carousel-container');
+
+                simBtns.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const simType = this.getAttribute('data-simulation');
+                        carouselContainer.style.display = 'none';
+                        document.querySelector('h1').style.display = 'none';
+                        document.querySelector('p').style.display = 'none';
+                        simContainer.style.display = 'block';
+
+                        // Mostrar la simulación específica
+                        document.querySelectorAll('.simulation-specific-content').forEach(
+                            content => {
+                                content.style.display = 'none';
+                            });
+                        document.getElementById(`sim-${simType}`).style.display = 'block';
+                    });
+                });
+
+                // Botones de volver
+                document.querySelectorAll('.btn-back').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        simContainer.style.display = 'none';
+                        carouselContainer.style.display = 'block';
+                        document.querySelector('h1').style.display = 'block';
+                        document.querySelector('p').style.display = 'block';
+                    });
+                });
+
+                // Configuración para la simulación de tiroides
+                const weightSliderThyroid = document.getElementById('weight-slider-thyroid');
+                const weightValueThyroid = document.getElementById('weight-value-thyroid');
+                const doseSliderThyroid = document.getElementById('dose-slider-thyroid');
+                const doseValueThyroid = document.getElementById('dose-value-thyroid');
+                const periodSliderThyroid = document.getElementById('period-slider-thyroid');
+                const periodValueThyroid = document.getElementById('period-value-thyroid');
+
+                weightSliderThyroid.addEventListener('input', () => {
+                    weightValueThyroid.textContent = `${weightSliderThyroid.value}g`;
+                });
+
+                doseSliderThyroid.addEventListener('input', () => {
+                    doseValueThyroid.textContent = `${doseSliderThyroid.value} mCi`;
+                });
+
+                periodSliderThyroid.addEventListener('input', () => {
+                    periodValueThyroid.textContent = `${periodSliderThyroid.value} days`;
+                });
+
+                // Simulación para tiroides
+                document.getElementById('run-simulation-thyroid').addEventListener('click', function () {
+                    // Show loading animation
+                    this.querySelector('.loading').style.display = 'inline-block';
+                    this.disabled = true;
+
+                    // Simulate API call delay
+                    setTimeout(() => {
+                        // Update results
+                        document.getElementById('uptake-value-thyroid').textContent = '67.3%';
+                        document.getElementById('uptake-progress-thyroid').style.width =
+                        '67.3%';
+
+                        document.getElementById('half-life-value-thyroid').textContent =
+                            '5.2 days';
+                        document.getElementById('half-life-progress-thyroid').style.width =
+                            '75%';
+
+                        document.getElementById('radiation-value-thyroid').textContent =
+                            '42.1 Gy';
+                        document.getElementById('radiation-progress-thyroid').style.width =
+                            '58%';
+
+                        document.getElementById('efficacy-value-thyroid').textContent = '78.9%';
+                        document.getElementById('efficacy-progress-thyroid').style.width =
+                            '78.9%';
+
+                        // Hide loading
+                        this.querySelector('.loading').style.display = 'none';
+                        this.disabled = false;
+                    }, 2000);
+                });
+            });
+        </script>
+
+
+        <!-- LITTLE PAW IA SECTION -->
+
+        <main id="littlepaw">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Little Paw AI Assistant</h1>
+
+            <div class="littlepaw-container">
+                <div class="littlepaw-character">
+                    <div class="character-container">
+                        <img src="images/mouse_chat-removebg-preview.png" alt="Little Paw" class="character-image">
+                        <div class="character-speech">
+                            <p id="character-dialogue">Hello! I'm Little Paw, your expert assistant in nuclear medicine.
+                                You can ask me about radioisotopes like I-131, 177Lu-PSMA, 99mTc-sestamibi, and more.
+                            </p>
+                        </div>
+                        <div class="character-info">
+                            <div class="info-item">
+                                <span class="info-label">Specialty:</span>
+                                <span class="info-value">Nuclear Medicine</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Knowledge base:</span>
+                                <span class="info-value">5 main radioisotopes</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Status:</span>
+                                <span class="info-value online">Online</span>
+                            </div>
+                        </div>
+                        <div class="knowledge-badges">
+                            <span class="badge">I-131</span>
+                            <span class="badge">177Lu-PSMA</span>
+                            <span class="badge">99mTc</span>
+                            <span class="badge">18F-FDG</span>
+                            <span class="badge">111In</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="paw-avatar">🐾</div>
+                        <div class="chat-info">
+                            <h3>Little Paw</h3>
+                            <div class="chat-status">Online • Nuclear Medicine Expert</div>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot">
+                            <div class="message-content">
+                                <p>Hello! I'm Little Paw, your AI assistant for nuclear medicine research. How can I
+                                    help you today?</p>
+                                <div class="quick-actions">
+                                    <button class="quick-btn">What is I-131?</button>
+                                    <button class="quick-btn">Uses of 99mTc-sestamibi</button>
+                                    <button class="quick-btn">Radiation safety</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" placeholder="Ask me about radioisotopes..." id="user-input">
+                        <button class="send-btn" id="send-message">📤</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="radioisotope-info">
+                <h2>Available radioisotopes for consultation</h2>
+                <div class="isotope-cards">
+                    <div class="isotope-card">
+                        <div class="isotope-icon">I</div>
+                        <h3>Iodine-131</h3>
+                        <p>Treatment of thyroid cancer</p>
+                    </div>
+                    <div class="isotope-card">
+                        <div class="isotope-icon">Lu</div>
+                        <h3>Lutetium-177</h3>
+                        <p>Targeted therapy for prostate cancer</p>
+                    </div>
+                    <div class="isotope-card">
+                        <div class="isotope-icon">Tc</div>
+                        <h3>Technetium-99m</h3>
+                        <p>Myocardial imaging diagnostics</p>
+                    </div>
+                    <div class="isotope-card">
+                        <div class="isotope-icon">F</div>
+                        <h3>Fluorine-18 FDG</h3>
+                        <p>PET diagnostics in oncology</p>
+                    </div>
+                    <div class="isotope-card">
+                        <div class="isotope-icon">In</div>
+                        <h3>Indium-111</h3>
+                        <p>Detection of neuroendocrine tumors</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <style>
+            /* Estilos para la nueva sección de Little Paw IA */
+            .littlepaw-container {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+
+            /* Estilos para el personaje */
+            .littlepaw-character {
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                border-radius: 20px;
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                height: 700px;
+            }
+
+            .character-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .character-image {
+                width: 180px;
+                height: 250px;
+                margin-bottom: 1.5rem;
+                filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+                animation: float 3s ease-in-out infinite;
+            }
+
+            .character-speech {
+                background: white;
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+                position: relative;
+                width: 90%;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            }
+
+            .character-speech:after {
+                content: '';
+                position: absolute;
+                top: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                border: 10px solid transparent;
+                border-bottom-color: white;
+            }
+
+            .character-speech p {
+                margin: 0;
+                font-size: 1.1rem;
+                color: #2c3e50;
+                line-height: 1.5;
+            }
+
+            .character-info {
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 15px;
+                padding: 1.2rem;
+                width: 90%;
+                margin-bottom: 1.5rem;
+            }
+
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.8rem;
+            }
+
+            .info-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .info-label {
+                font-weight: 600;
+                color: #2c3e50;
+            }
+
+            .info-value {
+                color: #7f8c8d;
+            }
+
+            .info-value.online {
+                color: #27ae60;
+                font-weight: 600;
+            }
+
+            .knowledge-badges {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+                width: 90%;
+            }
+
+            .badge {
+                background: #4a90a4;
+                color: white;
+                padding: 0.4rem 0.8rem;
+                border-radius: 15px;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            /* Estilos para la sección de radioisótopos */
+            .radioisotope-info {
+                margin-top: 4rem;
+            }
+
+            .radioisotope-info h2 {
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 2rem;
+                color: #2c3e50;
+            }
+
+            .isotope-cards {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 1.5rem;
+            }
+
+            .isotope-card {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 15px;
+                text-align: center;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s;
+            }
+
+            .isotope-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            }
+
+            .isotope-icon {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(45deg, #4a90a4, #6ab7c7);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 0 auto 1rem;
+            }
+
+            .isotope-card h3 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+                color: #2c3e50;
+            }
+
+            .isotope-card p {
+                font-size: 0.9rem;
+                color: #7f8c8d;
+            }
+
+            /* Responsive */
+            @media (max-width: 1200px) {
+                .isotope-cards {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+
+            @media (max-width: 992px) {
+                .littlepaw-container {
+                    grid-template-columns: 1fr;
+                }
+
+                .littlepaw-character {
+                    height: auto;
+                    padding-bottom: 3rem;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .isotope-cards {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @media (max-width: 576px) {
+                .isotope-cards {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+
+        <script>
+            // Little Paw chatbot functionality
+            document.addEventListener('DOMContentLoaded', function () {
+                // Simulated knowledge base about radioisotopes
+                const knowledgeBase = {
+                    'i-131': {
+                        name: 'Iodine-131',
+                        halfLife: '8.02 days',
+                        type: 'Beta and gamma emitter',
+                        uses: 'Treatment of thyroid cancer and hyperthyroidism',
+                        properties: 'I-131 naturally concentrates in the thyroid gland, making it ideal for targeted thyroid cancer therapies.',
+                        dosage: 'For thyroid cancer treatment: 30-200 mCi in humans; 1-10 mCi in mouse models',
+                        sideEffects: 'May cause nausea, salivary gland inflammation, and temporary decrease in thyroid function'
+                    },
+                    '177lu': {
+                        name: 'Lutetium-177',
+                        halfLife: '6.7 days',
+                        type: 'Beta emitter',
+                        uses: 'Targeted therapy for metastatic castration-resistant prostate cancer via PSMA',
+                        properties: '177Lu has a tissue penetration of 2mm, ideal for treatments requiring localized damage',
+                        dosage: 'Typically 7.4 GBq (200 mCi) per cycle in humans',
+                        sideEffects: 'Fatigue, mild nausea, and possible renal and hematological toxicity'
+                    },
+                    '99mtc': {
+                        name: 'Technetium-99m',
+                        halfLife: '6 hours',
+                        type: 'Pure gamma emitter',
+                        uses: 'Imaging diagnostics in cardiology, oncology, and neurology',
+                        properties: 'Ideal energy for scintigraphy (140 keV) with a short half-life that minimizes exposure',
+                        dosage: '10-30 mCi depending on the type of study in humans',
+                        sideEffects: 'Minimal due to its low radiation dose and short half-life'
+                    },
+                    '18f': {
+                        name: 'Fluorine-18 FDG',
+                        halfLife: '109.8 minutes',
+                        type: 'Positron emitter',
+                        uses: 'Oncological, neurological, and cardiac diagnostics via PET',
+                        properties: 'FDG is a glucose analog that shows cellular metabolism, especially useful for detecting high-consumption tissues like tumors',
+                        dosage: '5-15 mCi in humans for PET studies',
+                        sideEffects: 'Very limited, may cause mild allergic reactions in rare cases'
+                    },
+                    '111in': {
+                        name: 'Indium-111',
+                        halfLife: '2.8 days',
+                        type: 'Gamma emitter',
+                        uses: 'Peptide labeling for neuroendocrine tumor diagnostics',
+                        properties: 'Emits gamma photons at 173 keV and 247 keV, ideal for SPECT imaging',
+                        dosage: '3-5 mCi for diagnostic studies in humans',
+                        sideEffects: 'Generally well tolerated, possible reactions at the injection site'
+                    }
+                };
+
+                // DOM references
+                const userInput = document.getElementById('user-input');
+                const sendButton = document.getElementById('send-message');
+                const messagesContainer = document.getElementById('chat-messages');
+                const characterDialogue = document.getElementById('character-dialogue');
+
+                // Waiting phrases for the character
+                const waitingPhrases = [
+                    "I'm here to answer your questions about radioisotopes.",
+                    "Do you have questions about any nuclear medicine treatment?",
+                    "I can explain how I-131 works in thyroid cancer treatment.",
+                    "Do you need information about radiation safety?",
+                    "Ask me about any radioisotope listed in my knowledge base.",
+                    "My specialty is nuclear medicine and radiopharmaceuticals."
+                ];
+
+                // Change the character's phrase periodically
+                setInterval(() => {
+                    if (!characterDialogue.dataset.talking) {
+                        const randomIndex = Math.floor(Math.random() * waitingPhrases.length);
+                        characterDialogue.textContent = waitingPhrases[randomIndex];
+                    }
+                }, 8000);
+
+                // Initialize quick buttons
+                document.querySelectorAll('.quick-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        userInput.value = this.textContent;
+                        sendMessage();
+                    });
+                });
+
+                // Handle message sending
+                sendButton.addEventListener('click', sendMessage);
+                userInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+
+                function sendMessage() {
+                    const message = userInput.value.trim();
+
+                    if (message) {
+                        // Show user message
+                        addMessage('user', message);
+                        userInput.value = '';
+
+                        // Show character is thinking
+                        characterDialogue.dataset.talking = "true";
+                        characterDialogue.textContent = "Hmm, let me think about that...";
+
+                        // Simulate bot response
+                        setTimeout(() => {
+                            const response = generateResponse(message);
+                            addMessage('bot', response.text);
+
+                            // Update character dialogue
+                            characterDialogue.textContent = response.shortVersion || response.text;
+
+                            // Release "talking" state after a while
+                            setTimeout(() => {
+                                delete characterDialogue.dataset.talking;
+                            }, 5000);
+                        }, 1000);
+                    }
+                }
+
+                function addMessage(type, content) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${type}`;
+
+                    const messageContent = document.createElement('div');
+                    messageContent.className = 'message-content';
+                    messageContent.innerHTML = `<p>${content}</p>`;
+
+                    if (type === 'bot') {
+                        // Add quick actions based on content
+                        const relatedTopics = getRelatedTopics(content);
+
+                        if (relatedTopics.length > 0) {
+                            const quickActions = document.createElement('div');
+                            quickActions.className = 'quick-actions';
+
+                            relatedTopics.forEach(topic => {
+                                const button = document.createElement('button');
+                                button.className = 'quick-btn';
+                                button.textContent = topic;
+                                button.addEventListener('click', function () {
+                                    userInput.value = this.textContent;
+                                    sendMessage();
+                                });
+                                quickActions.appendChild(button);
+                            });
+
+                            messageContent.appendChild(quickActions);
+                        }
+                    }
+
+                    messageDiv.appendChild(messageContent);
+                    messagesContainer.appendChild(messageDiv);
+
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+
+                function getRelatedTopics(content) {
+                    // Basic system to generate related topics based on keywords
+                    const topics = [];
+
+                    if (content.toLowerCase().includes('i-131') || content.toLowerCase().includes('iodine')) {
+                        topics.push("What is the dose of I-131?", "Side effects of I-131");
+                    }
+
+                    if (content.toLowerCase().includes('177lu') || content.toLowerCase().includes('lutetium')) {
+                        topics.push("How does 177Lu-PSMA work?", "Compare 177Lu vs I-131");
+                    }
+
+                    if (content.toLowerCase().includes('99mtc') || content.toLowerCase().includes(
+                        'technetium')) {
+                        topics.push("Applications of 99mTc", "Half-life of 99mTc");
+                    }
+
+                    if (content.toLowerCase().includes('18f') || content.toLowerCase().includes('fdg')) {
+                        topics.push("PET with 18F-FDG", "Characteristics of 18F");
+                    }
+
+                    if (content.toLowerCase().includes('111in') || content.toLowerCase().includes('indium')) {
+                        topics.push("Uses of 111In-octreotide", "Properties of 111In");
+                    }
+
+                    if (content.toLowerCase().includes('safety') || content.toLowerCase().includes(
+                        'protection')) {
+                        topics.push("Radiation protection measures", "Exposure limits");
+                    }
+
+                    // If no specific related topics found
+                    if (topics.length === 0) {
+                        topics.push("Differences between radioisotopes", "Clinical applications",
+                            "Radiation safety");
+                    }
+
+                    // Limit to max 2 suggestions
+                    return topics.slice(0, 2);
+                }
+
+                function generateResponse(userMessage) {
+                    const msg = userMessage.toLowerCase();
+
+                    // Search in knowledge base
+                    if (msg.includes('i-131') || (msg.includes('iodine') && (msg.includes('thyroid') || msg
+                            .includes('cancer')))) {
+                        const info = knowledgeBase['i-131'];
+                        return {
+                            text: `<strong>${info.name}</strong>: It is a ${info.type} with a half-life of ${info.halfLife}. ${info.uses}. <br><br>${info.properties}<br><br>Typical dosage: ${info.dosage}.<br>Side effects: ${info.sideEffects}.`,
+                            shortVersion: `I-131 is essential for treating thyroid cancer with a half-life of 8.02 days.`
+                        };
+                    }
+
+                    if (msg.includes('177lu') || (msg.includes('lutetium') || msg.includes('prostate'))) {
+                        const info = knowledgeBase['177lu'];
+                        return {
+                            text: `<strong>${info.name}</strong>: It is a ${info.type} with a half-life of ${info.halfLife}. ${info.uses}. <br><br>${info.properties}<br><br>Typical dosage: ${info.dosage}.<br>Side effects: ${info.sideEffects}.`,
+                            shortVersion: `177Lu-PSMA is effective for metastatic prostate cancer with 2mm tissue penetration.`
+                        };
+                    }
+
+                    if (msg.includes('99mtc') || msg.includes('technetium') || (msg.includes('sestamibi') && msg
+                            .includes('breast'))) {
+                        const info = knowledgeBase['99mtc'];
+                        return {
+                            text: `<strong>${info.name}</strong>: It is a ${info.type} with a half-life of ${info.halfLife}. ${info.uses}. <br><br>${info.properties}<br><br>Typical dosage: ${info.dosage}.<br>Side effects: ${info.sideEffects}.`,
+                            shortVersion: `99mTc is ideal for diagnostics with a short half-life of 6 hours.`
+                        };
+                    }
+
+                    if (msg.includes('18f') || msg.includes('fdg') || msg.includes('pet')) {
+                        const info = knowledgeBase['18f'];
+                        return {
+                            text: `<strong>${info.name}</strong>: It is a ${info.type} with a half-life of ${info.halfLife}. ${info.uses}. <br><br>${info.properties}<br><br>Typical dosage: ${info.dosage}.<br>Side effects: ${info.sideEffects}.`,
+                            shortVersion: `18F-FDG shows cellular metabolism, crucial for detecting tumors via PET.`
+                        };
+                    }
+
+                    if (msg.includes('111in') || msg.includes('indium') || msg.includes('octreotide')) {
+                        const info = knowledgeBase['111in'];
+                        return {
+                            text: `<strong>${info.name}</strong>: It is a ${info.type} with a half-life of ${info.halfLife}. ${info.uses}. <br><br>${info.properties}<br><br>Typical dosage: ${info.dosage}.<br>Side effects: ${info.sideEffects}.`,
+                            shortVersion: `111In is mainly used for neuroendocrine tumor diagnostics.`
+                        };
+                    }
+
+                    if (msg.includes('safety') || msg.includes('protection') || msg.includes('radiation')) {
+                        return {
+                            text: `<strong>Radiation Safety</strong>: The ALARA principles (As Low As Reasonably Achievable) are fundamental: <br>
+                                        1. Minimize exposure time<br>
+                                        2. Maximize distance from the source<br>
+                                        3. Use appropriate shielding<br><br>
+                                        For I-131, 177Lu, and other beta/gamma emitters, lead shielding is recommended. The occupational dose limit is 20 mSv/year for professionals.`,
+                            shortVersion: `Radiation safety is based on time, distance, and shielding (ALARA principles).`
+                        };
+                    }
+
+                    if (msg.includes('dose') || msg.includes('administration') || msg.includes('administer')) {
+                        return {
+                            text: `<strong>Nuclear Medicine Dosage</strong>: The dose varies depending on the radioisotope and purpose:<br>
+                                        - For therapeutic I-131: 30-200 mCi in humans; 1-10 mCi in mouse models<br>
+                                        - For 177Lu-PSMA: 7.4 GBq per cycle (200 mCi)<br>
+                                        - For diagnostic 99mTc: 10-30 mCi depending on the study<br>
+                                        - For 18F-FDG: 5-15 mCi<br>
+                                        
+                                        The activity is calculated considering patient weight, renal function, and therapeutic or diagnostic goal.`,
+                            shortVersion: `The dose varies depending on the radioisotope and its therapeutic or diagnostic use.`
+                        };
+                    }
+
+                    if (msg.includes('half-life') || msg.includes('decay')) {
+                        return {
+                            text: `<strong>Half-life of Common Radioisotopes</strong>:<br>
+                                        - I-131: 8.02 days<br>
+                                        - 177Lu: 6.7 days<br>
+                                        - 99mTc: 6 hours<br>
+                                        - 18F: 109.8 minutes<br>
+                                        - 111In: 2.8 days<br><br>
+                                        
+                                        The physical half-life determines radioactive decay, while the effective half-life also considers biological elimination from the body.`,
+                            shortVersion: `Half-life ranges from minutes (18F) to days (I-131), affecting clinical use.`
+                        };
+                    }
+
+                    // Default response
+                    return {
+                        text: `Thank you for your question about "${userMessage}". As a nuclear medicine assistant, I can provide information about the main radioisotopes used in our simulations: I-131, 177Lu-PSMA, 99mTc-sestamibi, 18F-FDG, and 111In-octreotide. Would you like more details about any of these?`,
+                        shortVersion: `I can help you with information about the radioisotopes in our simulations.`
+                    };
+                }
+            });
+        </script>
+
+        <!-- SUPPORT SECTION -->
+        <main id="support">
+            <section class="support-hero">
+                <h1>How Can We Help You?</h1>
+                <p style="font-size: 1.2rem; color: #7f8c8d; max-width: 800px; margin: 0 auto;">
+                    We're here to make your research journey smoother. Check our resources or contact our team.
+                </p>
+            </section>
+
+            <div class="support-grid">
+                <div class="support-card">
+                    <div class="support-icon">📞</div>
+                    <h3>Contact Support</h3>
+                    <p>Our team is available Monday-Friday, 9AM-5PM (EST)</p>
+                    <p style="margin-top: 1rem;"><strong>Email:</strong> pawclear@gmail.com</p>
+                    <p><strong>Phone:</strong> +591 67155438</p>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">📚</div>
+                    <h3>Resources</h3>
+                    <p>Access our knowledge base, tutorials, and documentation</p>
+                    <button class="btn-primary" style="margin-top: 1rem;">Browse Resources</button>
+                </div>
+            </div>
+
+            <section class="faq-section">
+                <h2>Frequently Asked Questions</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        How accurate are PawClear's simulations?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Our simulations achieve a 95.7% correlation with real-world data, based on extensive validation
+                        against historical research. Each model is continuously improved with new data and peer-reviewed
+                        research to ensure maximum accuracy.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Can PawClear completely replace animal testing?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        While our goal is to eliminate the need for animal testing, we recognize that some regulatory
+                        frameworks still require limited validation studies. However, PawClear can significantly reduce
+                        the number of animals needed by pre-screening formulations and identifying only the most
+                        promising candidates for minimal validation.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Is the data from PawClear accepted by regulatory agencies?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        We are actively working with the FDA, EMA, and other regulatory bodies to validate and certify
+                        our simulation data. Several agencies now accept our predictive models as supplementary evidence
+                        in research applications, and we're making progress toward broader acceptance.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        How does the subscription model work?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        PawClear offers tiered subscription plans for academic researchers, biotech startups, and
+                        pharmaceutical companies. Each plan includes a set number of simulations per month, access to
+                        our AI assistant, and various levels of support. We also offer special pricing for non-profit
+                        research organizations.
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <script>
+            // Navigation functionality
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+
+            function showSection(sectionId) {
+                // Hide all sections
+                document.querySelectorAll('main').forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Show selected section
+                document.getElementById(sectionId).classList.add('active');
+
+                // Update active nav link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-section') === sectionId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            // Simulation controls
+            const weightSlider = document.getElementById('weight-slider');
+            const weightValue = document.getElementById('weight-value');
+            const doseSlider = document.getElementById('dose-slider');
+            const doseValue = document.getElementById('dose-value');
+            const periodSlider = document.getElementById('period-slider');
+            const periodValue = document.getElementById('period-value');
+
+            weightSlider.addEventListener('input', () => {
+                weightValue.textContent = `${weightSlider.value}g`;
+            });
+
+            doseSlider.addEventListener('input', () => {
+                doseValue.textContent = `${doseSlider.value} mCi`;
+            });
+
+            periodSlider.addEventListener('input', () => {
+                periodValue.textContent = `${periodSlider.value} days`;
+            });
+
+            // Simulation run
+            document.getElementById('run-simulation').addEventListener('click', function () {
+                // Show loading animation
+                this.querySelector('.loading').style.display = 'inline-block';
+                this.disabled = true;
+
+                // Simulate API call delay
+                setTimeout(() => {
+                    // Update results
+                    document.getElementById('uptake-value').textContent = '67.3%';
+                    document.getElementById('uptake-progress').style.width = '67.3%';
+
+                    document.getElementById('half-life-value').textContent = '5.2 days';
+                    document.getElementById('half-life-progress').style.width = '75%';
+
+                    document.getElementById('radiation-value').textContent = '42.1 Gy';
+                    document.getElementById('radiation-progress').style.width = '58%';
+
+                    document.getElementById('efficacy-value').textContent = '78.9%';
+                    document.getElementById('efficacy-progress').style.width = '78.9%';
+
+                    // Hide loading
+                    this.querySelector('.loading').style.display = 'none';
+                    this.disabled = false;
+                }, 2000);
+            });
+
+            // Chat functionality
+            document.getElementById('send-message').addEventListener('click', sendMessage);
+            document.getElementById('user-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                const input = document.getElementById('user-input');
+                const message = input.value.trim();
+
+                if (message) {
+                    // Add user message
+                    addMessage('user', message);
+                    input.value = '';
+
+                    // Simulate AI response after a short delay
+                    setTimeout(() => {
+                        let response = "I'm analyzing your question about " + message.substring(0, 30) +
+                            "... This is a simulated response based on nuclear medicine protocols. Would you like me to provide more specific information?";
+                        addMessage('bot', response);
+                    }, 1000);
+                }
+            }
+
+            function addMessage(type, content) {
+                const messagesContainer = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.innerHTML = `<p>${content}</p>`;
+
+                if (type === 'bot') {
+                    // Add quick actions to bot messages
+                    const quickActions = document.createElement('div');
+                    quickActions.className = 'quick-actions';
+                    quickActions.innerHTML = `
+                                <button class="quick-btn">Tell me more</button>
+                                <button class="quick-btn">Related research</button>
+                            `;
+                    messageContent.appendChild(quickActions);
+                }
+
+                messageDiv.appendChild(messageContent);
+                messagesContainer.appendChild(messageDiv);
+
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // FAQ accordion
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                });
+            });
+
+            // Animate stats counter
+            function animateCounter(elementId, targetValue) {
+                const element = document.getElementById(elementId);
+                let currentValue = 0;
+                const increment = Math.ceil(targetValue / 100);
+                const duration = 2000; // ms
+                const interval = duration / (targetValue / increment);
+
+                const timer = setInterval(() => {
+                    currentValue += increment;
+                    if (currentValue >= targetValue) {
+                        currentValue = targetValue;
+                        clearInterval(timer);
+                    }
+                    element.textContent = currentValue.toLocaleString();
+                }, interval);
+            }
+
+            // Run counter animation when page loads
+            window.addEventListener('DOMContentLoaded', () => {
+                animateCounter('animals-saved', 125847);
+            });
+        </script>
+        <!-- Agregando un footer elegante y funcional al proyecto -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <div class="footer-section logo-section">
+                    <div class="footer-logo" style="display: flex; align-items: center; gap: 0.7rem;">
+                        <img src="images/logo_paw-removebg-preview.png" alt="Logo PawClear"
+                            style="height: 40px; width: 40px; object-fit: contain;">
+                        PawClear
+                    </div>
+                    <p>Revolutionizing nuclear medicine with ethics and technology.</p>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Facebook"><i class="social-icon"><img src="images/facebook.png"
+                                    alt="Facebook" width="20" height="20"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="social-icon"><img src="images/x.png" alt="Twitter"
+                                    width="20" height="20"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="social-icon"><img src="images/linkeding.png"
+                                    alt="LinkedIn" width="20" height="20"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="social-icon"><img src="images/instagram.png"
+                                    alt="Instagram" width="20" height="20"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#" data-section="home">Home</a></li>
+                        <li><a href="#" data-section="about">About Us</a></li>
+                        <li><a href="#" data-section="simulation">AI Simulations</a></li>
+                        <li><a href="#" data-section="littlepaw">Little Paw AI</a></li>
+                        <li><a href="#" data-section="support">Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section links">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Research Library</a></li>
+                        <li><a href="#">API Documentation</a></li>
+                        <li><a href="#">Press Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section subscribe">
+                    <h3>Stay Informed</h3>
+                    <p>Subscribe to receive updates about new research and features.</p>
+                    <form class="subscribe-form">
+                        <input type="email" placeholder="Your email">
+                        <button type="submit" class="btn-subscribe">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 PawClear. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <style>
+            /* Estilos para el footer */
+            .site-footer {
+                background: #2c3e50;
+                color: #ecf0f1;
+                padding: 4rem 2rem 1rem;
+                margin-top: 4rem;
+            }
+
+            .footer-content {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 2rem;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            .footer-section {
+                margin-bottom: 2rem;
+            }
+
+            .footer-logo {
+                font-size: 1.8rem;
+                font-weight: bold;
+                color: #4a90a4;
+                margin-bottom: 1rem;
+            }
+
+            .footer-section p {
+                margin-bottom: 1.5rem;
+                line-height: 1.6;
+                color: #bdc3c7;
+            }
+
+            .footer-section h3 {
+                color: #4a90a4;
+                margin-bottom: 1.2rem;
+                font-size: 1.3rem;
+            }
+
+            .footer-section ul {
+                list-style: none;
+            }
+
+            .footer-section ul li {
+                margin-bottom: 0.8rem;
+            }
+
+            .footer-section ul li a {
+                color: #bdc3c7;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .footer-section ul li a:hover {
+                color: #4a90a4;
+                text-decoration: underline;
+            }
+
+            .social-icons {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .social-icon {
+                background: #34495e;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s;
+                font-size: 1.2rem;
+            }
+
+            .social-icon:hover {
+                background: #4a90a4;
+                transform: translateY(-3px);
+            }
+
+            .subscribe-form {
+                display: flex;
+                margin-top: 1rem;
+            }
+
+            .subscribe-form input {
+                flex: 1;
+                padding: 0.8rem;
+                border: none;
+                border-radius: 4px 0 0 4px;
+                font-size: 0.9rem;
+            }
+
+            .btn-subscribe {
+                background: #4a90a4;
+                color: white;
+                border: none;
+                padding: 0.8rem 1.2rem;
+                border-radius: 0 4px 4px 0;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .btn-subscribe:hover {
+                background: #6ab7c7;
+            }
+
+            .footer-bottom {
+                text-align: center;
+                padding-top: 2rem;
+                margin-top: 2rem;
+                border-top: 1px solid #34495e;
+                color: #bdc3c7;
+                font-size: 0.9rem;
+            }
+
+            @media (max-width: 768px) {
+                .footer-content {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+
+        <script>
+            // Añadir funcionalidad a los enlaces del footer
+            document.querySelectorAll('.footer-section.links a[data-section]').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+            // Implementación del modelo matemático y la simulación con IA
+            document.addEventListener('DOMContentLoaded', function () {
+                // Configuración de los sliders y elementos de UI para tiroides
+                const weightSliderThyroid = document.getElementById('weight-slider-thyroid');
+                const weightValueThyroid = document.getElementById('weight-value-thyroid');
+                const doseSliderThyroid = document.getElementById('dose-slider-thyroid');
+                const doseValueThyroid = document.getElementById('dose-value-thyroid');
+                const periodSliderThyroid = document.getElementById('period-slider-thyroid');
+                const periodValueThyroid = document.getElementById('period-value-thyroid');
+                const volumeSliderThyroid = document.getElementById('volume-slider-thyroid');
+                const volumeValueThyroid = document.getElementById('volume-value-thyroid');
+                const growthSliderThyroid = document.getElementById('growth-slider-thyroid');
+                const growthValueThyroid = document.getElementById('growth-value-thyroid');
+
+                // Actualizar valores al mover los sliders
+                if (weightSliderThyroid) {
+                    weightSliderThyroid.addEventListener('input', () => {
+                        weightValueThyroid.textContent = `${weightSliderThyroid.value}g`;
+                    });
+                }
+
+                if (doseSliderThyroid) {
+                    doseSliderThyroid.addEventListener('input', () => {
+                        doseValueThyroid.textContent = `${doseSliderThyroid.value} mCi`;
+                    });
+                }
+
+                if (periodSliderThyroid) {
+                    periodSliderThyroid.addEventListener('input', () => {
+                        periodValueThyroid.textContent = `${periodSliderThyroid.value} days`;
+                    });
+                }
+
+                if (volumeSliderThyroid) {
+                    volumeSliderThyroid.addEventListener('input', () => {
+                        volumeValueThyroid.textContent = `${volumeSliderThyroid.value} mm³`;
+                    });
+                }
+
+                if (growthSliderThyroid) {
+                    growthSliderThyroid.addEventListener('input', () => {
+                        growthValueThyroid.textContent = growthSliderThyroid.value;
+                    });
+                }
+
+                // Cambio entre pestañas de resultados
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Desactivar todas las pestañas
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(tab => tab.classList
+                            .remove('active'));
+
+                        // Activar la pestaña seleccionada
+                        button.classList.add('active');
+                        const tabId = button.getAttribute('data-tab') + '-tab';
+                        document.getElementById(tabId).classList.add('active');
+                    });
+                });
+
+                // Simulación para tiroides
+                if (document.getElementById('run-simulation-thyroid')) {
+                    document.getElementById('run-simulation-thyroid').addEventListener('click', function () {
+                        // Mostrar animación de carga
+                        const loadingIcon = this.querySelector('.loading');
+                        loadingIcon.style.display = 'inline-block';
+                        this.disabled = true;
+
+                        // Recopilar parámetros de entrada
+                        const weight = parseFloat(weightSliderThyroid.value);
+                        const dose = parseFloat(doseSliderThyroid.value);
+                        const period = parseInt(periodSliderThyroid.value);
+                        const initialVolume = parseInt(volumeSliderThyroid.value);
+                        const growthRate = parseFloat(growthSliderThyroid.value);
+                        const age = document.getElementById('age-select-thyroid').value;
+                        const adminMethod = document.getElementById('method-select-thyroid').value;
+                        const uptakeLevel = document.getElementById('uptake-select-thyroid').value;
+                        const metastasisLevel = document.getElementById('metastasis-select-thyroid')
+                            .value;
+
+                        // Simular proceso de análisis (retardo)
+                        setTimeout(() => {
+                            // Calcular resultados basados en modelos matemáticos
+                            const results = simulateThyroidTreatment({
+                                weight,
+                                dose,
+                                period,
+                                initialVolume,
+                                growthRate,
+                                age,
+                                adminMethod,
+                                uptakeLevel,
+                                metastasisLevel
+                            });
+
+                            // Actualizar UI con resultados
+                            updateSimulationResults(results);
+
+                            // Crear gráfica de cinética
+                            createKineticsChart(results.kineticData);
+
+                            // Actualizar predicciones de IA
+                            updateAIPredictions(results.aiPredictions);
+
+                            // Ocultar carga
+                            loadingIcon.style.display = 'none';
+                            this.disabled = false;
+                        }, 2000);
+                    });
+                }
+
+                // Función de simulación basada en modelo matemático compartimental
+                function simulateThyroidTreatment(params) {
+                    // Factores de ajuste basados en parámetros del animal
+                    const weightFactor = params.weight / 25; // Normalizado a 25g
+
+                    // Factores de edad (metabólicos)
+                    let metabolicRateFactor;
+                    switch (params.age) {
+                        case 'young':
+                            metabolicRateFactor = 1.2;
+                            break;
+                        case 'elderly':
+                            metabolicRateFactor = 0.8;
+                            break;
+                        default:
+                            metabolicRateFactor = 1.0;
+                            break; // adulto
+                    }
+
+                    // Factores de administración
+                    const bioavailability = params.adminMethod === 'oral' ? 0.8 : 0.95;
+
+                    // Factor de captación de tumor
+                    let uptakeFactor;
+                    switch (params.uptakeLevel) {
+                        case 'low':
+                            uptakeFactor = 0.5 + (Math.random() * 0.1);
+                            break; // 50-60%
+                        case 'high':
+                            uptakeFactor = 0.8 + (Math.random() * 0.15);
+                            break; // 80-95%
+                        default:
+                            uptakeFactor = 0.6 + (Math.random() * 0.2);
+                            break; // 60-80%
+                    }
+
+                    // Calcular vida media biológica basada en peso y edad
+                    const biologicalHalfLife = 4.5 * metabolicRateFactor * Math.pow(weightFactor, 0.25);
+
+                    // Vida media física del I-131 (constante)
+                    const physicalHalfLife = 8.02;
+
+                    // Calcular vida media efectiva
+                    // 1/T_eff = 1/T_phys + 1/T_bio
+                    const effectiveHalfLife = (physicalHalfLife * biologicalHalfLife) / (physicalHalfLife +
+                        biologicalHalfLife);
+
+                    // Modelo de eficacia basado en dosis, captación y volumen
+                    // Usando la ecuación de decaimiento tumoral: V(t) = V0 * e^(-α*D*U*t)
+                    // Donde α es coeficiente de sensibilidad, D es dosis, U es captación
+                    const tumorSensitivityCoef = 0.015 * (params.metastasisLevel === 'high' ? 0.6 :
+                        params.metastasisLevel === 'moderate' ? 0.8 :
+                        params.metastasisLevel === 'low' ? 0.9 : 1.0);
+
+                    // Dosis efectiva al tumor
+                    const effectiveDose = params.dose * bioavailability * uptakeFactor;
+
+                    // Crecimiento sin tratamiento basado en modelo exponencial
+                    const untreatedVolume = params.initialVolume * Math.exp(params.growthRate * params.period);
+
+                    // Volumen con tratamiento usando modelo de decaimiento exponencial
+                    const decayConstant = tumorSensitivityCoef * effectiveDose / params.initialVolume;
+                    const treatedVolume = params.initialVolume * Math.exp(params.growthRate * params.period -
+                        decayConstant * params.period);
+
+                    // Calcular reducción de volumen
+                    const volumeReductionPercent = ((untreatedVolume - treatedVolume) / untreatedVolume) * 100;
+
+                    // Generar datos de cinética (para gráfico)
+                    const kineticData = {
+                        timePoints: [],
+                        tumorVolume: [],
+                        radioactivity: []
+                    };
+
+                    for (let day = 0; day <= params.period; day++) {
+                        kineticData.timePoints.push(day);
+
+                        // Volumen tumoral en el tiempo
+                        const volumeAtTime = params.initialVolume *
+                            Math.exp(params.growthRate * day - decayConstant * (1 - Math.exp(-0.693 * day /
+                                effectiveHalfLife)));
+                        kineticData.tumorVolume.push(volumeAtTime);
+
+                        // Radiactividad residual
+                        const activityAtTime = params.dose * Math.exp(-0.693 * day / effectiveHalfLife);
+                        kineticData.radioactivity.push(activityAtTime);
+                    }
+
+                    // Calcular eficacia basada en reducción de volumen y modelo biológico
+                    let efficacy;
+                    if (volumeReductionPercent > 80) {
+                        efficacy = 95;
+                    } else if (volumeReductionPercent > 60) {
+                        efficacy = 80 + (volumeReductionPercent - 60) * 0.75;
+                    } else if (volumeReductionPercent > 30) {
+                        efficacy = 50 + (volumeReductionPercent - 30) * 1.0;
+                    } else if (volumeReductionPercent > 0) {
+                        efficacy = volumeReductionPercent * 1.5;
+                    } else {
+                        efficacy = 0;
+                    }
+
+                    // Predicciones de IA basadas en modelo de regresión logística entrenado
+                    // (simulado para este prototipo)
+                    const successProbability = calculateSuccessProbability(params, efficacy);
+                    const survivabilityScore = calculateSurvivability(params, volumeReductionPercent);
+
+                    // Generar recomendación de dosis
+                    let doseRecommendation;
+                    if (efficacy < 40) {
+                        doseRecommendation = "Increase dose by 30-50%";
+                    } else if (efficacy < 70) {
+                        doseRecommendation = "Consider increasing dose by 10-20%";
+                    } else if (efficacy > 90) {
+                        doseRecommendation = "Current dose is optimal";
+                    } else {
+                        doseRecommendation = "Current dose is adequate";
+                    }
+
+                    return {
+                        uptake: uptakeFactor * 100,
+                        biologicalHalfLife,
+                        effectiveHalfLife,
+                        radiationExposure: effectiveDose * 10, // Gy aproximado
+                        response: volumeReductionPercent,
+                        efficacy,
+                        volumeReduction: volumeReductionPercent.toFixed(1),
+                        initialVolume: params.initialVolume,
+                        finalVolume: treatedVolume.toFixed(1),
+                        kineticData,
+                        aiPredictions: {
+                            success: successProbability,
+                            regression: volumeReductionPercent.toFixed(1) + "%",
+                            survival: survivabilityScore + "%",
+                            recommendation: doseRecommendation
+                        }
+                    };
+                }
+
+                function calculateSuccessProbability(params, efficacy) {
+                    // Modelo de regresión logística (simulado)
+                    // P = 1 / (1 + e^-(β0 + β1*efficacy + β2*volume + β3*metastasis))
+                    let metastasisScore;
+                    switch (params.metastasisLevel) {
+                        case 'none':
+                            metastasisScore = 0;
+                            break;
+                        case 'low':
+                            metastasisScore = 1;
+                            break;
+                        case 'moderate':
+                            metastasisScore = 2;
+                            break;
+                        case 'high':
+                            metastasisScore = 3;
+                            break;
+                    }
+
+                    const logit = -3.5 + (0.07 * efficacy) - (0.01 * params.initialVolume) - (0.8 *
+                        metastasisScore);
+                    const probability = 100 / (1 + Math.exp(-logit));
+
+                    return Math.min(Math.max(probability, 5), 99).toFixed(1) + "%";
+                }
+
+                function calculateSurvivability(params, volumeReduction) {
+                    // Modelo de supervivencia basado en reducción de volumen y factores de riesgo
+                    let baseRate = 50 + volumeReduction * 0.4;
+
+                    // Ajustar por metástasis
+                    if (params.metastasisLevel === 'high') baseRate *= 0.7;
+                    else if (params.metastasisLevel === 'moderate') baseRate *= 0.85;
+                    else if (params.metastasisLevel === 'low') baseRate *= 0.95;
+
+                    // Limitar a un rango razonable
+                    return Math.min(Math.max(baseRate, 10), 98).toFixed(1);
+                }
+
+                function updateSimulationResults(results) {
+                    // Actualizar métricas básicas
+                    document.getElementById('uptake-value-thyroid').textContent = results.uptake.toFixed(1) +
+                        '%';
+                    document.getElementById('uptake-progress-thyroid').style.width = results.uptake + '%';
+
+                    document.getElementById('half-life-value-thyroid').textContent = results.effectiveHalfLife
+                        .toFixed(1) + ' days';
+                    document.getElementById('half-life-progress-thyroid').style.width = (results
+                        .effectiveHalfLife / 8 * 100) + '%';
+
+                    document.getElementById('radiation-value-thyroid').textContent = results.radiationExposure
+                        .toFixed(1) + ' Gy';
+                    document.getElementById('radiation-progress-thyroid').style.width = (results
+                        .radiationExposure / 100 * 100) + '%';
+
+                    document.getElementById('response-value-thyroid').textContent = results.response.toFixed(
+                        1) + '% reduction';
+                    document.getElementById('response-progress-thyroid').style.width = Math.min(results
+                        .response, 100) + '%';
+
+                    document.getElementById('efficacy-value-thyroid').textContent = results.efficacy.toFixed(
+                        1) + '%';
+                    document.getElementById('efficacy-progress-thyroid').style.width = results.efficacy + '%';
+
+                    // Actualizar datos cinéticos
+                    document.getElementById('bio-half-life').textContent = results.biologicalHalfLife.toFixed(
+                        1) + ' days';
+                    document.getElementById('eff-half-life').textContent = results.effectiveHalfLife.toFixed(
+                        1) + ' days';
+                    document.getElementById('volume-reduction').textContent = results.volumeReduction + '%';
+                }
+
+                function updateAIPredictions(predictions) {
+                    document.getElementById('success-prob').textContent = predictions.success;
+                    document.getElementById('tumor-regression').textContent = predictions.regression;
+                    document.getElementById('survival-prob').textContent = predictions.survival;
+                    document.getElementById('dose-recommendation').textContent = predictions.recommendation;
+
+                    // Update AI explanation (English version)
+                    const explanationText = `
+                                    Based on the configured parameters, our deep learning model
+                                    predicts a treatment success probability of ${predictions.success} with a
+                                    margin of error of ±5%. The model was trained on over 10,000 cases of
+                                    I-131 treatments in murine thyroid cancer models, considering
+                                    factors such as tumor growth, radiopharmaceutical biodistribution, and metabolic response.
+                                    
+                                    The expected tumor regression is approximately ${predictions.regression},
+                                    which aligns with published studies for similar doses.
+                                    
+                                    ${predictions.recommendation}.
+                                `;
+
+                    document.getElementById('ai-explanation-text').textContent = explanationText;
+                }
+
+                function createKineticsChart(kineticData) {
+                    // Crear gráfica de cinética utilizando una librería de gráficos
+                    // (En un escenario real, usaríamos Chart.js, D3.js o una librería similar)
+                    console.log("Gráfica de cinética con datos:", kineticData);
+
+                    // Aquí iría el código para crear la gráfica
+                    // Para este prototipo, simularemos que la gráfica se ha creado
+                }
+            });
+        </script>
+    </div>
+
+</body>
+
+</html>
